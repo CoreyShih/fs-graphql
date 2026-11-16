@@ -119,6 +119,15 @@ const typeDefs = /* GraphQL */ `
     allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
   }
+
+  type Mutation {
+    addBook(
+      title: String!
+      published: Int!
+      author: String!
+      genres: [String!]!
+    ): Book
+  }
 `;
 
 const resolvers = {
@@ -137,6 +146,18 @@ const resolvers = {
       return books.filter((book) => filters.every((filter) => filter(book)));
     },
     allAuthors: () => authors,
+  },
+  Mutation: {
+    addBook: (_, args) => {
+      if (!authors.find((a) => a.name === args.author)) {
+        const author = { name: args.author, id: crypto.randomUUID() };
+        authors = authors.concat(author);
+      }
+
+      const book = { ...args, id: crypto.randomUUID() };
+      books = books.concat(book);
+      return book;
+    },
   },
 };
 
