@@ -1,3 +1,6 @@
+const Book = require("./models/book");
+const Author = require("./models/author");
+
 let authors = [
   {
     name: "Robert Martin",
@@ -91,43 +94,59 @@ let books = [
 ];
 
 const resolvers = {
+  Book: {
+    author: async ({ author }) => Author.findOne({ _id: author }),
+  },
   Author: {
-    bookCount: ({ name }) => books.filter((b) => b.author === name).length,
+    bookCount: async ({ _id }) => {
+      const books = await Book.find({ author: _id });
+      return books.length;
+    },
   },
   Query: {
-    bookCount: () => books.length,
-    authorCount: () => authors.length,
-    allBooks: (_, { author, genre }) => {
-      const byAuthor = (book) => !author || book.author === author;
-      const byGenre = (book) => !genre || book.genres.includes(genre);
+    bookCount: async () => Book.collection.countDocuments(),
+    authorCount: async () => Author.collection.countDocuments(),
+    allBooks: async (_, { author, genre }) => {
+      // const byAuthor = (book) => !author || book.author === author;
+      // const byGenre = (book) => !genre || book.genres.includes(genre);
 
-      const filters = [byAuthor, byGenre];
+      // const filters = [byAuthor, byGenre];
 
-      return books.filter((book) => filters.every((filter) => filter(book)));
-    },
-    allAuthors: () => authors,
-  },
-  Mutation: {
-    addBook: (_, args) => {
-      if (!authors.find((a) => a.name === args.author)) {
-        const author = { name: args.author, id: crypto.randomUUID() };
-        authors = authors.concat(author);
+      // return books.filter((book) => filters.every((filter) => filter(book)));
+      const filter = {};
+
+      if (author) {
+        const authorInDb = await Author.findOne({ name: author });
+        filter.author = authorInDb && authorInDb._id;
       }
 
-      const book = { ...args, id: crypto.randomUUID() };
-      books = books.concat(book);
-      return book;
+      if (genre) filter.genres = genre;
+
+      return Book.find(filter);
     },
-    editAuthor: (_, { name, setBornTo }) => {
-      const author = authors.find((a) => a.name === name);
+    allAuthors: async () => Author.find({}),
+  },
+  Mutation: {
+    addBook: async (_, args) => {
+      let author = await Author.findOne({ name: args.author });
+
+      if (!author) {
+        author = new Author({ name: args.author });
+        await author.save();
+      }
+
+      const book = new Book({ ...args, author: author._id });
+      return book.save();
+    },
+    editAuthor: async (_, { name, setBornTo }) => {
+      const author = await Author.findOne({ name });
 
       if (!author) {
         return null;
       }
 
-      const updatedAuthor = { ...author, born: setBornTo };
-      authors = authors.map((a) => (a.name === name ? updatedAuthor : a));
-      return updatedAuthor;
+      author.born = setBornTo;
+      return author.save();
     },
   },
 };
