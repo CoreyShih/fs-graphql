@@ -1,6 +1,8 @@
 const { GraphQLError } = require("graphql");
+const jwt = require("jsonwebtoken");
 const Book = require("./models/book");
 const Author = require("./models/author");
+const User = require("./models/user");
 
 const resolvers = {
   Book: {
@@ -28,9 +30,18 @@ const resolvers = {
       return Book.find(filter);
     },
     allAuthors: async () => Author.find({}),
+    me: (_root, _args, { currentUser }) => currentUser,
   },
   Mutation: {
-    addBook: async (_, args) => {
+    addBook: async (_, args, { currentUser }) => {
+      if (!currentUser) {
+        throw new GraphQLError("not authenticated", {
+          extensions: {
+            code: "UNAUTHENTICATED",
+          },
+        });
+      }
+
       let author = await Author.findOne({ name: args.author });
 
       if (!author) {
@@ -64,7 +75,15 @@ const resolvers = {
 
       return book;
     },
-    editAuthor: async (_, { name, setBornTo }) => {
+    editAuthor: async (_, { name, setBornTo }, { currentUser }) => {
+      if (!currentUser) {
+        throw new GraphQLError("not authenticated", {
+          extensions: {
+            code: "UNAUTHENTICATED",
+          },
+        });
+      }
+
       const author = await Author.findOne({ name });
 
       if (!author) {
@@ -86,6 +105,38 @@ const resolvers = {
       }
 
       return author;
+    },
+    createUser: async (_, { username, favoriteGenre }) => {
+      const user = new User({ username, favoriteGenre });
+
+      try {
+        await user.save();
+      } catch (error) {
+        throw new GraphQLError(error.message, {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            invalidArgs: username,
+            error,
+          },
+        });
+      }
+
+      return user;
+    },
+    login: async (_, { username, password }) => {
+      const user = await User.findOne({ username });
+
+      if (!user || password !== "secret") {
+        // hardcoded password for now
+        throw new GraphQLError("wrong credentials", {
+          extensions: {
+            code: "BAD_USER_INPUT",
+          },
+        });
+      }
+
+      const userForToken = { username: user.username, id: user._id };
+      return { value: jwt.sign(userForToken, process.env.JWT_SECRET) };
     },
   },
 };
