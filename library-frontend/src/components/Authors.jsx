@@ -2,10 +2,10 @@ import { useQuery } from "@apollo/client/react";
 import { ALL_AUTHORS } from "../queries";
 import BirthYear from "./BirthYear";
 
-const Authors = (props) => {
+const Authors = ({ show, token, setError }) => {
   const { loading, error, data } = useQuery(ALL_AUTHORS);
 
-  if (!props.show) return null;
+  if (!show) return null;
   if (loading) return <div>loading...</div>;
   if (error) return <div>error: {error.message}</div>;
 
@@ -30,7 +30,7 @@ const Authors = (props) => {
           ))}
         </tbody>
       </table>
-      <BirthYear authors={authors} />
+      {token && <BirthYear authors={authors} setError={setError} />}
     </div>
   );
 };
