@@ -37,6 +37,7 @@ const BirthYear = ({ authors, setError }) => {
             name
             <select
               required
+              name="name"
               value={name}
               onChange={({ target }) => setName(target.value)}
             >

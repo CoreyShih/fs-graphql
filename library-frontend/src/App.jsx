@@ -50,7 +50,12 @@ const App = () => {
 
       <Recommendations show={page === "recommend"} token={token} />
 
-      <Login show={page === "login"} setToken={setToken} setError={notify} />
+      <Login
+        show={page === "login"}
+        setToken={setToken}
+        setPage={setPage}
+        setError={notify}
+      />
     </div>
   );
 };

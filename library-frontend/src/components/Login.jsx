@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { LOGIN } from "../queries";
 
-const Login = ({ show, setToken, setError }) => {
+const Login = ({ show, setToken, setPage, setError }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -24,6 +24,7 @@ const Login = ({ show, setToken, setError }) => {
     login({ variables: { username, password } });
     setUsername("");
     setPassword("");
+    setPage("authors");
   };
 
   return (

@@ -24,7 +24,11 @@ const Books = ({ show }) => {
   return (
     <div>
       <h2>books</h2>
-
+      {genre && (
+        <div>
+          in genre <strong>{genre}</strong>
+        </div>
+      )}
       <table>
         <tbody>
           <tr>
