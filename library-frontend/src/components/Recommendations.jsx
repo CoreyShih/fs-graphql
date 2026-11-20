@@ -1,8 +1,8 @@
 import { useQuery, skipToken } from "@apollo/client/react";
 import { BOOKS_BY_GENRE, FAVORITE_GENRE } from "../queries";
 
-const Recommendations = ({ show }) => {
-  const genreResult = useQuery(FAVORITE_GENRE);
+const Recommendations = ({ show, token }) => {
+  const genreResult = useQuery(FAVORITE_GENRE, token ? {} : skipToken);
   const favoriteGenre = genreResult?.data?.me?.favoriteGenre;
 
   const booksResult = useQuery(
@@ -15,7 +15,7 @@ const Recommendations = ({ show }) => {
       : skipToken,
   );
 
-  if (!show) return null;
+  if (!show || !token) return null;
   if (genreResult.loading || booksResult.loading) return <div>loading...</div>;
   if (genreResult.error) return <div>error: {genreResult.error.message}</div>;
   if (booksResult.error) return <div>error: {booksResult.error.message}</div>;

@@ -19,6 +19,7 @@ const App = () => {
     setToken(null);
     localStorage.clear();
     client.resetStore();
+    setPage("login");
   };
 
   const notify = (message) => {
@@ -47,7 +48,7 @@ const App = () => {
 
       <NewBook show={page === "add"} setError={notify} />
 
-      <Recommendations show={page === "recommend"} />
+      <Recommendations show={page === "recommend"} token={token} />
 
       <Login show={page === "login"} setToken={setToken} setError={notify} />
     </div>

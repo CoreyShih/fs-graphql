@@ -22,6 +22,8 @@ const Login = ({ show, setToken, setError }) => {
   const submit = (event) => {
     event.preventDefault();
     login({ variables: { username, password } });
+    setUsername("");
+    setPassword("");
   };
 
   return (
