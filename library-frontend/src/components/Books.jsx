@@ -7,7 +7,6 @@ const Books = ({ show }) => {
   const allResult = useQuery(ALL_BOOKS);
   const genreResult = useQuery(BOOKS_BY_GENRE, {
     variables: { genre },
-    fetchPolicy: "network-only",
   });
 
   if (!show) return null;

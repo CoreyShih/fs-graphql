@@ -10,7 +10,6 @@ const Recommendations = ({ show, token }) => {
     favoriteGenre
       ? {
           variables: { genre: favoriteGenre },
-          fetchPolicy: "network-only",
         }
       : skipToken,
   );

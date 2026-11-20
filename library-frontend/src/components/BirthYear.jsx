@@ -7,7 +7,13 @@ const BirthYear = ({ authors, setError }) => {
   const [year, setYear] = useState("");
 
   const [editBirthYear] = useMutation(EDIT_BIRTH_YEAR, {
-    refetchQueries: [ALL_AUTHORS],
+    update: (cache, { data }) => {
+      cache.updateQuery({ query: ALL_AUTHORS }, ({ allAuthors }) => ({
+        allAuthors: allAuthors.map((a) =>
+          a.id === data.editAuthor.id ? data.editAuthor : a,
+        ),
+      }));
+    },
     onError: (error) => setError(error.message),
   });
 
